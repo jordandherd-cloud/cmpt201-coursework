@@ -2,24 +2,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ASSERT(expr)
-  {
-    if (!(expr)) {
-
-fprintf(stderr, "Assertion failed: %s\n", #expr);
-
-fprint(stderr, "At %s:%d\n", __FILE__, __LINE__);
-
-exit(1);
-}
-}
-#define TEST(expr)
-  {
-    if (!(expr)) {
-      fprintf(stderr, "Test failed: %s\n", #expr);
-      exit(1);
+#define ASSERT(expr)                                                                               \
+  {                                                                                                \
+    if (!(expr)) {                                                                                 \
+      fprintf(stderr, "Assertion failed: %s\n", #expr);                                            \
+      fprintf(stderr, "At %s:%d\n", __FILE__, __LINE__);                                           \
+      exit(1);                                                                                     \
     }                                                                                              \
-
+  }
+#define TEST(expr)                                                                                 \
+  {                                                                                                \
+    if (!(expr)) {                                                                                 \
+      fprintf(stderr, "Test failed: %s\n", #expr);                                                 \
+      exit(1);                                                                                     \
+    }                                                                                              \
+  }
 
 typedef struct node {
   uint64_t data;
@@ -59,10 +56,8 @@ void insert_sorted(uint64_t data) {
       curr = curr->next;
     }
 
+    new_node->next = curr;
     prev->next = new_node;
-    if (curr != NULL) {
-      new_node->next = curr->next;
-    }
   }
 
   info.sum += data;
