@@ -118,12 +118,18 @@ void reduce(Output *output) {
 
   int count = output->count;
 
-  printf("%d, [", (*output).doubled_value);
-  for (int i = 0; i < output->count; i++) {
+  printf("(%d, [", (*output).doubled_value);
+  for (int i = 0; i < count; i++) {
 
-    printf(" %d, ", (*output).line_numbers[i]);
+    if (i == count - 1) {
+
+      printf("%d", (*output).line_numbers[i]);
+    } else {
+
+      printf("%d, ", (*output).line_numbers[i]);
+    }
   }
-  printf("]\n");
 
-  // Print the doubled number and line numbers
+  printf("])\n");
 }
+// Print the doubled number and line numbers
