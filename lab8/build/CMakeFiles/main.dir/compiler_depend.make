@@ -85,7 +85,8 @@ CMakeFiles/main.dir/src/lab8.c.o: /home/cmpt201/cmpt201-coursework/lab8/src/lab8
   /usr/lib/llvm-18/lib/clang/18/include/__stddef_wchar_t.h \
   /usr/lib/llvm-18/lib/clang/18/include/stdarg.h \
   /usr/lib/llvm-18/lib/clang/18/include/stddef.h \
-  /usr/lib/llvm-18/lib/clang/18/include/stdint.h
+  /usr/lib/llvm-18/lib/clang/18/include/stdint.h \
+  /usr/lib/llvm-18/lib/clang/18/share/asan_ignorelist.txt
 
 
 /usr/lib/llvm-18/lib/clang/18/include/stdarg.h:
@@ -221,6 +222,8 @@ CMakeFiles/main.dir/src/lab8.c.o: /home/cmpt201/cmpt201-coursework/lab8/src/lab8
 /usr/lib/llvm-18/lib/clang/18/include/__stddef_max_align_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
+
+/usr/lib/llvm-18/lib/clang/18/share/asan_ignorelist.txt:
 
 /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h:
 

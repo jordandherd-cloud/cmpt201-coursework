@@ -87,4 +87,5 @@ CMakeFiles/main.dir/src/lab8.c.o
  /usr/lib/llvm-18/lib/clang/18/include/stdarg.h
  /usr/lib/llvm-18/lib/clang/18/include/stddef.h
  /usr/lib/llvm-18/lib/clang/18/include/stdint.h
+ /usr/lib/llvm-18/lib/clang/18/share/asan_ignorelist.txt
 

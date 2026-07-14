@@ -73,19 +73,21 @@ static count_map_t count_words_parallel(word_t *words, size_t num_words) {
 
     threads_args[i] = pack_args(&map, words, num_words, &count_mutex);
 
-    pthread_create(&threads[i], NULL, counter_thread_func(), threads_args[i]);
+    pthread_create(&threads[i], NULL, counter_thread_func, threads_args[i]);
 
     // TODO: Prepare the arguments and launch the threads
   }
 
   for (size_t i = 0; i < THREAD_COUNT; i++) {
-    pthread_join(&threads[i], NULL);
+    pthread_join(threads[i], NULL);
     // TODO: Wait for threads to finish
-    free(threads_args[i]); // this may need to be moved
   }
 
-  // TODO: Cleanup
-
+  pthread_mutex_destroy(&count_mutex);
+  for (size_t i = 0; i < THREAD_COUNT; i++) {
+    free(threads_args[i]); // this may need to be moved
+    // TODO: Cleanup
+  }
   return map;
 }
 
