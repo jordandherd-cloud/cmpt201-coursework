@@ -71,7 +71,7 @@ static count_map_t count_words_parallel(word_t *words, size_t num_words) {
     size_t thread_arg_num_words =
         chunk_size + (i == THREAD_COUNT - 1 ? num_words % THREAD_COUNT : 0);
 
-    threads_args[i] = pack_args(&map, words, num_words, &count_mutex);
+    threads_args[i] = pack_args(&map, thread_arg_words, thread_arg_num_words, &count_mutex);
 
     pthread_create(&threads[i], NULL, counter_thread_func, threads_args[i]);
 
