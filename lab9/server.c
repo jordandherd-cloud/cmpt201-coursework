@@ -37,30 +37,30 @@ void *handle_client(void *arg) {
   int cfd = client->cfd;
   int client_id = client->client_id;
   free(client);
-  size_t size_read;
 
-  char buf[BUF_SIZE];
+  ssize_t size_read;
+  char buf[BUF_SIZE + 1];
 
-  while ((size_read = read(cfd, buf, BUF_SIZE) > 0)) {
+  while ((size_read = read(cfd, buf, BUF_SIZE)) > 0) {
     buf[size_read] = '\0';
-    printf("client ID %d: %s", client_id, buf);
 
     pthread_mutex_lock(&count_mutex);
     total_message_count++;
+    int msg_num = total_message_count;
     pthread_mutex_unlock(&count_mutex);
+
+    printf("Msg #%4d; Client ID %d: %s", msg_num, client_id, buf);
   }
 
   if (size_read == -1) {
     handle_error("read");
   }
 
+  printf("Ending thread for client %d\n", client_id);
+
   if (close(cfd) == -1) {
     handle_error("close");
   }
-
-  // TODO: print the message received from client
-  //
-  // TODO: increase total_message_count per message
 
   return NULL;
 }
@@ -109,6 +109,8 @@ int main() {
 
     pthread_mutex_unlock(&client_id_mutex);
 
+    printf("New client created! ID %d on socket FD %d\n", client->client_id, client->cfd);
+
     if (pthread_create(&t, NULL, handle_client, client) != 0) {
       free(client);
       handle_error("pthread_create");
@@ -119,12 +121,8 @@ int main() {
     }
 
     pthread_detach(t);
-    if (close(sfd) == -1) {
-      handle_error("close");
-    }
-
-    if (close(sfd) == -1)
-      handle_error("close");
-    return 0;
   }
+  if (close(sfd) == -1)
+    handle_error("close");
+  return 0;
 }
