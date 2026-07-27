@@ -14,7 +14,7 @@
 int main() {
 
   // socket()
-  int sock_fd = socket(AF_UNIX, SOCK_DGRAM, 0);
+  int sock_fd = socket(AF_UNIX, SOCK_STREAM, 0);
 
   if (sock_fd == -1) {
 
@@ -23,6 +23,7 @@ int main() {
   }
   // bind
 
+  // not finished
   struct sockaddr_un addr;
   memset(&addr, 0, sizeof(addr));
   addr.sun_family = AF_UNIX;
@@ -35,28 +36,16 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
-  for (;;) {
-    char buf[1024];
-    int size_read = read(recv_fd, buf, sizeof(buf), 0, NULL, NULL);
-    if (size_read > 0) {
-
-      if (write(STDOUT_FILENO, buf, size_read)) {
-        perror("write");
-        exit(EXIT_FAILURE);
-      }
-
-    } else {
-      break;
-    }
-  }
-  // unfinished
-
-  close(sock_fd);
-  return 0;
-
   // listen()
+  if (listen(sock_fd, 10) == -1) {
 
-  // i dont think we need to listen here
+    perror("listen");
+    exit(EXIT_FAILURE);
+  }
+  // accept()
+  //
+
+  int recv_fd = accept(sock_fd, NULL, NULL);
 
   if (recv_fd == -1) {
 
