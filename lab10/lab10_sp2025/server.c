@@ -4,19 +4,25 @@ Questions to answer at top of server.c:
 Understanding the Client:
 1. How is the client sending data to the server? What protocol?
 
-The client is using a socket. Also it is using the TCP protocol.
+The client is using a socket, which was created with socket(AF_INET, SOCK_STREAM, 0), it  then
+connects using connect() and uses write() to send data.
+Also it is using the TCP protocol.
+
 
 2. What data is the client sending to the server?
 
 It is sending strings from the array named messages.
+These messages are copied into the buffer array.
+
 
 Understanding the Server:
 1. Explain the argument that the `run_acceptor` thread is passed as an argument.
 
 The argument passed to the run_acceptor thread is a struct with 3
-variables, one which is a bool, true if the thread is running,
-otherwise false. Another is a struct which contains a pointer to a
-node in the list and a counter. Lastly it has a lock for the list.
+variables, one of which is an atomic boolean, true if the thread is running,
+otherwise false. Another is a pointer to a list handler struct which
+keeps track of the linked list that stores received messages. Lastly it has a pointer to a lock for
+the list, which allows threads to safely access it.
 
 2. How are received messages stored?
 
@@ -25,15 +31,34 @@ There is a struct for list nodes.
 
 3. What does `main()` do with the received messages?
 
-It collects them into one int named collected.
+It traveses the linked list printing each received message. It then free allocated memory, and
+stores the amount of messages in an int.
 
 
 4. How are threads used in this sample code?
 
-The threads are used to accept the clients.
+The threads are used to accept the clients, and handle them
+concurrently. The acceptor threads accept new connections and
+then create client handling threads.
 
 */
 
+/**Explain the use of non-blocking sockets in this lab.
+
+  How are sockets made non-blocking?
+
+  They use set_non_blocking on the socket.
+
+  What sockets are made non-blocking?
+
+  The clients sockets are made non blocking.
+
+  Why are these sockets made non-blocking? What purpose does it serve?
+
+
+
+
+*/
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -76,7 +101,8 @@ struct client_args {
 };
 
 struct acceptor_args {
-  atomic_bool run;
+  atomic_bool run; // atomics ensure that reads and writes by multiple threads are seperated,
+                   // avoiding data races
 
   struct list_handle *list_handle;
   pthread_mutex_t *list_lock;
@@ -160,13 +186,19 @@ static void *run_client(void *args) {
       }
     } else if (bytes_read > 0) {
       // Create node with data
+
+      pthread_mutex_lock(&cargs->list_lock);
       struct list_node *new_node = malloc(sizeof(struct list_node));
       new_node->next = NULL;
       new_node->data = malloc(BUF_SIZE);
       memcpy(new_node->data, msg_buf, BUF_SIZE);
 
       struct list_handle *list_handle = cargs->list_handle;
+
+      add_to_list(cargs->list_handle, new_node); // why not just list handle
       // TODO: Safely use add_to_list to add new_node to the list
+
+      pthread_mutex_unlock(&cargs->list_lock);
     }
   }
 
@@ -195,7 +227,6 @@ static void *run_acceptor(void *args) {
           handle_error("accept");
         }
       } else {
-        printf("Client connected!\n");
 
         client_args[num_clients].cfd = cfd;
         client_args[num_clients].run = true;
@@ -203,7 +234,10 @@ static void *run_acceptor(void *args) {
         client_args[num_clients].list_lock = aargs->list_lock;
         num_clients++;
 
+        pthread_create(&threads[num_clients], NULL, run_client, &client_args[num_clients]);
         // TODO: Create a new thread to handle the client
+
+        printf("Client connected!\n");
       }
     }
   }
@@ -212,8 +246,14 @@ static void *run_acceptor(void *args) {
 
   // Shutdown and cleanup
   for (int i = 0; i < num_clients; i++) {
+
+    client_args[i].run = false;
+    pthread_join(threads[i], NULL);
+    close(client_args[i].cfd);
     // TODO: Set flag to stop the client thread
     // TODO: Wait for the client thread and close its socket
+
+    pthread_detach(threads[i]);
   }
 
   if (close(sfd) == -1) {
@@ -243,6 +283,13 @@ int main() {
   };
   pthread_create(&acceptor_thread, NULL, run_acceptor, &aargs);
 
+  while (1) {
+
+    // i dont really understand why you need a mutex here
+    if (list_handle.count >= MAX_CLIENTS * NUM_MSG_PER_CLIENT) {
+      break;
+    }
+  }
   // TODO: Wait until enough messages are received
 
   aargs.run = false;
