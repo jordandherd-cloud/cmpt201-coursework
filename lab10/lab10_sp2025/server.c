@@ -201,9 +201,6 @@ static void *run_client(void *args) {
     }
   }
 
-  if (close(cfd) == -1) {
-    perror("client thread close");
-  }
   return NULL;
 }
 
