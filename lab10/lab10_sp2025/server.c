@@ -6,7 +6,7 @@ Understanding the Client:
 
 The client is using a socket, which was created with socket(AF_INET, SOCK_STREAM, 0), it  then
 connects using connect() and uses write() to send data.
-Also it is using the TCP protocol.
+Also it is using the TCP protocol we can tell because the socket type is SOCK_STREAM.
 
 
 2. What data is the client sending to the server?
@@ -26,13 +26,15 @@ the list, which allows threads to safely access it.
 
 2. How are received messages stored?
 
-Received messages are stored in the linked list as nodes.
+Received messages are stored in the linked list as nodes so the messages are copied into dynamically
+allocated memory.
 There is a struct for list nodes.
 
 3. What does `main()` do with the received messages?
 
-It traveses the linked list printing each received message. It then free allocated memory, and
-stores the amount of messages in an int.
+Main waits until all expected messages are received, and stops the acceptor thread. It then traveses
+the linked list printing each received message. It then frees allocated memory, it verifies that the
+expected number of messages was collected and stores the amount of messages in an int.
 
 
 4. How are threads used in this sample code?
@@ -47,14 +49,24 @@ then create client handling threads.
 
   How are sockets made non-blocking?
 
-  They use set_non_blocking on the socket.
+  They use set_non_blocking on the socket, which is a helper function that adds the O_NONBLOCK flag
+  to the socket's file descriptor.
 
   What sockets are made non-blocking?
 
-  The clients sockets are made non blocking.
+  The clients, and server sockets are made non blocking.
 
   Why are these sockets made non-blocking? What purpose does it serve?
 
+  Non-blocking sockets prevent the program from waiting indefinitely on operations like accept() ,
+  instead the program keeps running and checking back later, allowing it to handle many tasks at
+  once.
+
+  For example if these sockets in our code were blocking then when accept() was called the thread
+  would wait at that accept call until a client connects. This can prevent the thread from shutting
+  down properly. So we make it non blocking because
+  we can't always assume that there will be clients connecting constantly (this is just one example,
+  there are other reasons).
 
 
 
@@ -194,7 +206,7 @@ static void *run_client(void *args) {
       struct list_handle *list_handle = cargs->list_handle;
 
       pthread_mutex_lock(cargs->list_lock);
-      add_to_list(list_handle, new_node); // why not just list handle
+      add_to_list(list_handle, new_node);
       // TODO: Safely use add_to_list to add new_node to the list
 
       pthread_mutex_unlock(cargs->list_lock);
