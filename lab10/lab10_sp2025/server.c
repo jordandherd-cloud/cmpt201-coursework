@@ -174,7 +174,6 @@ static void *run_client(void *args) {
   struct client_args *cargs = (struct client_args *)args;
   int cfd = cargs->cfd;
   set_non_blocking(cfd);
-
   char msg_buf[BUF_SIZE];
 
   while (cargs->run) {
@@ -187,7 +186,6 @@ static void *run_client(void *args) {
     } else if (bytes_read > 0) {
       // Create node with data
 
-      pthread_mutex_lock(&cargs->list_lock);
       struct list_node *new_node = malloc(sizeof(struct list_node));
       new_node->next = NULL;
       new_node->data = malloc(BUF_SIZE);
@@ -195,10 +193,11 @@ static void *run_client(void *args) {
 
       struct list_handle *list_handle = cargs->list_handle;
 
-      add_to_list(cargs->list_handle, new_node); // why not just list handle
+      pthread_mutex_lock(cargs->list_lock);
+      add_to_list(list_handle, new_node); // why not just list handle
       // TODO: Safely use add_to_list to add new_node to the list
 
-      pthread_mutex_unlock(&cargs->list_lock);
+      pthread_mutex_unlock(cargs->list_lock);
     }
   }
 
@@ -232,11 +231,11 @@ static void *run_acceptor(void *args) {
         client_args[num_clients].run = true;
         client_args[num_clients].list_handle = aargs->list_handle;
         client_args[num_clients].list_lock = aargs->list_lock;
-        num_clients++;
 
         pthread_create(&threads[num_clients], NULL, run_client, &client_args[num_clients]);
         // TODO: Create a new thread to handle the client
 
+        num_clients++;
         printf("Client connected!\n");
       }
     }
@@ -252,8 +251,6 @@ static void *run_acceptor(void *args) {
     close(client_args[i].cfd);
     // TODO: Set flag to stop the client thread
     // TODO: Wait for the client thread and close its socket
-
-    pthread_detach(threads[i]);
   }
 
   if (close(sfd) == -1) {
@@ -286,9 +283,16 @@ int main() {
   while (1) {
 
     // i dont really understand why you need a mutex here
+
+    pthread_mutex_lock(&list_mutex);
     if (list_handle.count >= MAX_CLIENTS * NUM_MSG_PER_CLIENT) {
+
+      pthread_mutex_unlock(&list_mutex);
+
       break;
     }
+
+    pthread_mutex_unlock(&list_mutex);
   }
   // TODO: Wait until enough messages are received
 

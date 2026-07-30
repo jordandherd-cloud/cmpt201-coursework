@@ -117,13 +117,13 @@ CMAKE_OBJCOPY:FILEPATH=/usr/bin/objcopy
 CMAKE_OBJDUMP:FILEPATH=/usr/bin/objdump
 
 //Value Computed by CMake
-CMAKE_PROJECT_DESCRIPTION:STATIC=This is for lab10.
+CMAKE_PROJECT_DESCRIPTION:STATIC=
 
 //Value Computed by CMake
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=NetworkExcersise
+CMAKE_PROJECT_NAME:STATIC=NetworkExercise
 
 //Value Computed by CMake
 CMAKE_PROJECT_VERSION:STATIC=1.0
@@ -213,6 +213,15 @@ NetworkExcersise_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 NetworkExcersise_SOURCE_DIR:STATIC=/home/cmpt201/cmpt201-coursework/lab10/lab10_sp2025
+
+//Value Computed by CMake
+NetworkExercise_BINARY_DIR:STATIC=/home/cmpt201/cmpt201-coursework/lab10/lab10_sp2025/build
+
+//Value Computed by CMake
+NetworkExercise_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+NetworkExercise_SOURCE_DIR:STATIC=/home/cmpt201/cmpt201-coursework/lab10/lab10_sp2025
 
 
 ########################
