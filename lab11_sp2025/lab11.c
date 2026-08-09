@@ -117,12 +117,12 @@ int verify(const char *message_path, const char *sign_path, EVP_PKEY *pubkey) {
   if (!mdctx) {
     handle_error("Error creating EVP_MD_CTX");
   }
-  if (!EVP_DigestSignInit(mdctx, NULL, EVP_sha256(), NULL, pubkey)) {
+  if (!EVP_DigestVerifyInit(mdctx, NULL, EVP_sha256(), NULL, pubkey)) {
 
     handle_error("Error initializing EVP_DigestVerify");
   }
 
-  if (1 != EVP_DigestSignUpdate(mdctx, message, MAX_FILE_SIZE)) {
+  if (1 != EVP_DigestVerifyUpdate(mdctx, message, message_size)) {
     handle_error("Error updating EVP_DigestVerify");
   }
 
