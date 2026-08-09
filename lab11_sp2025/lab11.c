@@ -5,15 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #define RED "\e[9;31m"
 #define GRN "\e[0;32m"
 #define CRESET "\e[0m"
 
-#define handle_error(msg)            \
-  do {                               \
-    perror(msg);                     \
-    exit(EXIT_FAILURE);              \
+#define handle_error(msg)                                                                          \
+  do {                                                                                             \
+    perror(msg);                                                                                   \
+    exit(EXIT_FAILURE);                                                                            \
   } while (0)
 
 size_t read_all_bytes(const char *filename, void *buffer, size_t buffer_size) {
@@ -57,13 +56,17 @@ int verify(const char *message_path, const char *sign_path, EVP_PKEY *pubkey);
 
 int main() {
   // File paths
-  const char *message_files[] = {"message1.txt", "message2.txt",
-                                 "message3.txt"};
-  const char *signature_files[] = {"signature1.sig", "signature2.sig",
-                                   "signature3.sig"};
+  const char *message_files[] = {"message1.txt", "message2.txt", "message3.txt"};
+  const char *signature_files[] = {"signature1.sig", "signature2.sig", "signature3.sig"};
 
   // TODO: Load the public key using PEM_read_PUBKEY
-  EVP_PKEY *pubkey = NULL;
+
+  FILE *pub_key_file = fopen("public_key.pem", "rb");
+  if (!pub_key_file) {
+    handle_error("Error opening public key file");
+  }
+
+  EVP_PKEY *pubkey = PEM_read_PUBKEY(pub_key_file, NULL, NULL, NULL);
 
   // Verify each message
   for (int i = 0; i < 3; i++) {
@@ -103,5 +106,36 @@ int verify(const char *message_path, const char *sign_path, EVP_PKEY *pubkey) {
   // TODO: Check if the message is authentic using the signature.
   // Look at: https://wiki.openssl.org/index.php/EVP_Signing_and_Verifying
 
-  return -1;
+  // read all bytes ( file, buf , size of buf)
+  size_t message_size = read_all_bytes(message_path, message, MAX_FILE_SIZE);
+
+  size_t signature_size = read_all_bytes(sign_path, signature, MAX_FILE_SIZE);
+
+  // allocate new digest context using EVP_MD_CTX_new()
+
+  EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
+  if (!mdctx) {
+    handle_error("Error creating EVP_MD_CTX");
+  }
+  if (!EVP_DigestSignInit(mdctx, NULL, EVP_sha256(), NULL, pubkey)) {
+
+    handle_error("Error initializing EVP_DigestVerify");
+  }
+
+  if (1 != EVP_DigestSignUpdate(mdctx, message, MAX_FILE_SIZE)) {
+    handle_error("Error updating EVP_DigestVerify");
+  }
+
+  int result = EVP_DigestVerifyFinal(mdctx, signature, signature_size);
+
+  EVP_MD_CTX_free(mdctx);
+
+  return result;
+
+  //  if (!(*sig = OPENSSL_malloc(sizeof(unsigned char)) * (*MAX_FILE_SIZE)))
+  //  handle_error("Malloc");
+
+  // on the digest initialize it , update it and verify it, w/ digest init digest verify update
+  // digest verify final
+  //  return -1;
 }
