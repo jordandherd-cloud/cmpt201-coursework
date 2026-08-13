@@ -11,8 +11,8 @@ static void *thread_func(void *arg) {
 
   int id = *(int *)arg;
 
-  int left = (int)arg;
-  int right = ((int)arg + 1) % NUMBER;
+  int left = id;
+  int right = (id + 1) % NUMBER;
   for (;;) {
     printf("Thread %d: thinking\n", (int)arg);
     sleep(5);
