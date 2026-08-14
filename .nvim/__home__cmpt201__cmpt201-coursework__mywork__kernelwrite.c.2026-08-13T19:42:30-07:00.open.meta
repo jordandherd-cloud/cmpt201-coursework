@@ -1,0 +1,8 @@
+trigger:open
+undo_seq:0
+source_path:/home/cmpt201/cmpt201-coursework/mywork/kernelwrite.c
+cursor:1,1
+lines:26
+changedtick:2
+reg_size:269
+source_relpath:mywork/kernelwrite.c
